@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  news News[]
+
+  @@map("users")
+}
+
+model News {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  slug       String   @unique
+  excerpt    String
+  content    String
+  coverImage String?
+  tags       String[]
+  published  Boolean  @default(false)
+  views      Int      @default(0)
+  authorId   String   @db.ObjectId
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([published, createdAt])
+  @@map("news")
+}

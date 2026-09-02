@@ -1,0 +1,27 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: news-mongo
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    command: ['--replSet', 'rs0', '--bind_ip_all']
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      # Initiates the single-node replica set on first start, then reports healthy
+      # once the node has been elected primary.
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status().ok }
+          catch (e) {
+            rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }).ok
+          }
+        "
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 5s
+
+volumes:
+  mongo-data:
