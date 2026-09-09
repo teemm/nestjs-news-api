@@ -1,0 +1,26 @@
+[
+  {
+    "question": "What is refund policy?",
+    "answer": "Our refund policy allows customers to request a refund within 30 days of purchase. To initiate a refund, please contact our support team with your order details."
+  },
+  {
+    "question": "How can I contact customer support?",
+    "answer": "You can contact our customer support team via email at support@example.com or by calling our toll-free number at 1-800-123-4567."
+  },
+  {
+    "question": "What is the return policy?",
+    "answer": "We offer a free return policy within 30 days of purchase. To return an item, please contact our support team to receive a return authorization and instructions on how to send the item back to us."
+  },
+  {
+    "question": "How long does it take to process a refund?",
+    "answer": "Refunds are typically processed within 5-7 business days after we receive the returned item. You will receive a confirmation email once your refund has been processed."
+  },
+  {
+    "question": "Can I exchange an item instead of getting a refund?",
+    "answer": "Yes, we offer exchanges for items that are in stock. Please contact our support team to check availability and initiate an exchange."
+  },
+  {
+    "question": "What if I received a damaged or defective item?",
+    "answer": "If you received a damaged or defective item, please contact our support team immediately with photos of the item and your order details. We will work with you to resolve the issue and provide a replacement or refund as necessary."
+  }
+]

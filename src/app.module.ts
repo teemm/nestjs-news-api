@@ -5,6 +5,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { ValidationPipe } from '@nestjs/common';
 import { join } from 'node:path';
 import { AuthModule } from './auth/auth.module';
+import { ChatModule } from './chat/chat.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { validateEnv } from './config/env.validation';
 import { NewsModule } from './news/news.module';
@@ -30,6 +31,7 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     AuthModule,
     NewsModule,
+    ChatModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

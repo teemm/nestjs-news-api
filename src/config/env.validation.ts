@@ -1,5 +1,13 @@
 import { plainToInstance } from 'class-transformer';
-import { IsInt, IsString, IsUrl, Matches, MinLength, validateSync } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Matches,
+  MinLength,
+  validateSync,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -39,6 +47,28 @@ export class EnvironmentVariables {
 
   @IsUrl({ require_tld: false, require_protocol: true }, { message: 'APP_URL must be a valid URL' })
   APP_URL: string;
+
+  // --- AI chatbot (optional: only required to use the /chat endpoints) ---
+  @IsOptional()
+  @IsString()
+  ANTHROPIC_API_KEY?: string;
+
+  @IsOptional()
+  @IsString()
+  ANTHROPIC_MODEL?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  ANTHROPIC_MAX_TOKENS?: number;
+
+  @IsOptional()
+  @IsString()
+  GOOGLE_API_KEY?: string;
+
+  @IsOptional()
+  @IsString()
+  GOOGLE_EMBEDDING_MODEL?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

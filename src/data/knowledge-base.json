@@ -1,0 +1,14 @@
+[
+  {
+    "question": "hi",
+    "answer": "Hello! How can I help you today?"
+  },
+  {
+    "question": "what is your name?",
+    "answer": "I am a chatbot built for this News API. I don't have a name, but you can call me whatever you like!"
+  },
+  {
+    "question": "what can you do?",
+    "answer": "I can answer your questions, provide information, and help you with various tasks. Just ask me anything!"
+  }
+]
