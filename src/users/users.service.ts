@@ -43,6 +43,13 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { id }, select: SAFE_USER_SELECT });
   }
 
+  findAll(): Promise<SafeUser[]> {
+    return this.prisma.user.findMany({
+      select: SAFE_USER_SELECT,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async findByIdOrFail(id: string): Promise<SafeUser> {
     const user = await this.findById(id);
 

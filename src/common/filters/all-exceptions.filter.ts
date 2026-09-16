@@ -9,7 +9,7 @@ import {
 import { HttpAdapterHost } from '@nestjs/core';
 import { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
-import { MAX_IMAGE_SIZE_BYTES, removeImageByUrl } from '../config/multer.config';
+import { MAX_IMAGE_SIZE_BYTES, MAX_VIDEO_SIZE_BYTES, removeUploadedFile } from '../config/multer.config';
 
 export interface ErrorResponseBody {
   statusCode: number;
@@ -39,15 +39,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
     const ctx = host.switchToHttp();
-    const request = ctx.getRequest<Request & { file?: Express.Multer.File }>();
+    const request = ctx.getRequest<Request & { file?: Express.Multer.File; files?: Express.Multer.File[] | Record<string, Express.Multer.File[]> }>();
     const response = ctx.getResponse<Response>();
 
     const normalized = this.normalize(exception);
+    if (exception instanceof HttpException && exception.getStatus() === HttpStatus.PAYLOAD_TOO_LARGE
+      && /\/videos(?:\/|$|\?)/.test(request.url)) {
+      normalized.message = `Video is too large. The maximum allowed size is ${MAX_VIDEO_SIZE_BYTES / (1024 * 1024)} MB.`;
+    }
 
     // A failed multipart request has already written its file to disk — clean it up.
-    if (request.file?.filename) {
-      removeImageByUrl(request.file.filename);
-    }
+    const files = Array.isArray(request.files)
+      ? request.files
+      : Object.values(request.files ?? {}).flat();
+    if (request.file) files.push(request.file);
+    files.forEach(removeUploadedFile);
 
     const body: ErrorResponseBody = {
       statusCode: normalized.status,
@@ -97,7 +103,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     return {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'Internal server error',
+      message:
+        process.env.NODE_ENV === 'production' || !(exception instanceof Error)
+          ? 'Internal server error'
+          : exception.message || 'Internal server error',
     };
   }
 

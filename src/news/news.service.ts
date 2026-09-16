@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+﻿import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { News, Prisma, Role } from '@prisma/client';
 import { buildImageUrl, removeImageByUrl } from '../common/config/multer.config';
@@ -132,7 +132,7 @@ export class NewsService {
     const existing = await this.findByIdOrFail(id);
     this.assertCanManage(existing, user);
 
-    const data: Prisma.NewsUpdateInput = {};
+    const data: Record<string, Prisma.InputJsonValue> = {};
 
     if (dto.title !== undefined && dto.title !== existing.title) {
       data.title = dto.title;
@@ -144,9 +144,31 @@ export class NewsService {
     if (dto.published !== undefined) data.published = dto.published;
     if (image) data.coverImage = buildImageUrl(this.appUrl, image.filename);
 
-    const updated = await this.prisma.news.update({
+    // A single-document write is atomic and also works on standalone MongoDB.
+    const result = await this.prisma.$runCommandRaw({
+      update: 'news',
+      updates: [{
+        q: { _id: { $oid: id } },
+        u: { $set: { ...data, updatedAt: { $date: new Date().toISOString() } } },
+        multi: false,
+        upsert: false,
+      }],
+    });
+    const writeErrors = result.writeErrors;
+    if (Array.isArray(writeErrors) && writeErrors.length > 0) {
+      if (writeErrors.some((error) => error && typeof error === 'object' && !Array.isArray(error) && error.code === 11000)) {
+        throw new ConflictException('A news item with this slug already exists. Please try again.');
+      }
+      throw new InternalServerErrorException('The news update could not be saved.');
+    }
+    if (result.ok !== 1 || result.writeConcernError) {
+      throw new InternalServerErrorException('The news update could not be confirmed.');
+    }
+    if (result.n !== 1) {
+      throw new NotFoundException(`No news item found with id "${id}"`);
+    }
+    const updated = await this.prisma.news.findUniqueOrThrow({
       where: { id },
-      data,
       include: NEWS_INCLUDE,
     });
 

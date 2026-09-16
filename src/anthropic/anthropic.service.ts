@@ -21,10 +21,10 @@ export class AnthropicService {
     if (!apiKey) {
       this.logger.warn('ANTHROPIC_API_KEY is not set — /chat endpoints will return 503');
     } else {
-      this.ai = new Anthropic({ apiKey });
+      this.ai = new Anthropic({ apiKey, timeout: 45000, maxRetries: 0 });
     }
 
-    this.model = this.config.get('ANTHROPIC_MODEL', { infer: true }) ?? 'claude-3-haiku-20240307';
+    this.model = this.config.get('ANTHROPIC_MODEL', { infer: true }) ?? 'claude-haiku-4-5-20251001';
     this.maxTokens = this.config.get('ANTHROPIC_MAX_TOKENS', { infer: true }) ?? 1024;
   }
 
@@ -47,13 +47,17 @@ export class AnthropicService {
         messages: [{ role: 'user', content: prompt }],
       });
 
-      const replyContent = response.content[0];
-      const reply = replyContent?.type === 'text' ? replyContent.text : '';
+      const reply = response.content
+        .filter(block => block.type === 'text')
+        .map(block => block.text)
+        .join('\n')
+        .trim();
+      if (!reply) throw new Error('Anthropic returned no text');
 
       return { reply };
     } catch (error) {
-      this.logger.error('Error calling Anthropic API', error);
-      return { reply: 'Sorry, I encountered an error while processing your request.' };
+      this.logger.error('Error calling Anthropic API', error instanceof Error ? error.name : 'Unknown error');
+      throw new ServiceUnavailableException('AI chatbot is temporarily unavailable. Please try again.');
     }
   }
 }

@@ -5,12 +5,15 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { ValidationPipe } from '@nestjs/common';
 import { join } from 'node:path';
 import { AuthModule } from './auth/auth.module';
+import { BannersModule } from './banners/banners.module';
 import { ChatModule } from './chat/chat.module';
+import { ContactMessagesModule } from './contact-messages/contact-messages.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { validateEnv } from './config/env.validation';
 import { NewsModule } from './news/news.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
+import { VideosModule } from './videos/videos.module';
 
 @Module({
   imports: [
@@ -32,6 +35,9 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     NewsModule,
     ChatModule,
+    ContactMessagesModule,
+    BannersModule,
+    VideosModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

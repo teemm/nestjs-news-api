@@ -246,3 +246,22 @@ uploads/news/              runtime image storage (git-ignored)
   unknown request properties are rejected with `400`.
 - `/uploads` is served with `Cross-Origin-Resource-Policy: cross-origin` so a browser
   front-end on another origin can display the images; everything else is behind helmet.
+
+
+## Features merged from nestjs-news-api-main
+
+This project includes banner listing (active/all/random), admin banner creation,
+editing and deletion, banner image uploads, the Banner Prisma model, and the
+safe users-list endpoint from the sibling backend. Existing chat, Anthropic,
+embeddings, RAG data and configuration are retained.
+
+After changing the schema, run `npm run prisma:generate`, then `npm run build`.
+Start this backend with `npm run start:dev`; only one backend should use port 3000
+at a time. The optional `npm run add:admins` script is available but is not run
+during setup.
+
+The ordinary news/banner API can run without AI keys. Real chat replies require
+the chat provider configuration described above.
+
+Run `node node_modules/jest/bin/jest.js --runInBand` to check the merged routes using a mocked database;
+these checks do not modify saved users, news or banners.
